@@ -56,8 +56,6 @@ public class Store : Notifyer
         else
         {
             SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "Increment");
-            _count++;
-            Notify();
         }
     }
 
@@ -74,8 +72,6 @@ public class Store : Notifyer
         else
         {
             SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "Decrement");
-            _count--;
-            Notify();
         }
     }
 }
