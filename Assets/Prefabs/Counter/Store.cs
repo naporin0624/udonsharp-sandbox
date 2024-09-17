@@ -17,7 +17,11 @@ public class Store : Notifyer
     private void transferOwner()
     {
         var player = Networking.LocalPlayer;
-        Networking.SetOwner(player, gameObject);
+        var owner = Networking.GetOwner(gameObject);
+        if (owner == null)
+        {
+            Networking.SetOwner(player, gameObject);
+        }
     }
 
     private void sync()
@@ -42,14 +46,36 @@ public class Store : Notifyer
     public void Increment()
     {
         transferOwner();
-        _count++;
-        sync();
+        var player = Networking.LocalPlayer;
+
+        if (player.IsOwner(gameObject))
+        {
+            _count++;
+            sync();
+        }
+        else
+        {
+            SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "Increment");
+            _count++;
+            Notify();
+        }
     }
 
     public void Decrement()
     {
         transferOwner();
-        _count--;
-        sync();
+        var player = Networking.LocalPlayer;
+
+        if (player.IsOwner(gameObject))
+        {
+            _count--;
+            sync();
+        }
+        else
+        {
+            SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "Decrement");
+            _count--;
+            Notify();
+        }
     }
 }
