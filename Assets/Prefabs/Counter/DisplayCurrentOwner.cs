@@ -17,6 +17,14 @@ public class DisplayCurrentOwner : Observer
 
     public override void OnNotify()
     {
-        displayText.text = Networking.GetOwner(store.gameObject).displayName;
+        var player = Networking.LocalPlayer;
+        if (player.IsOwner(store.gameObject))
+        {
+            displayText.text = "You";
+        }
+        else
+        {
+            displayText.text = Networking.GetOwner(store.gameObject).displayName;
+        }
     }
 }

@@ -14,64 +14,69 @@ public class Store : Notifyer
         }
     }
 
-    private void transferOwner()
-    {
-        var player = Networking.LocalPlayer;
-        var owner = Networking.GetOwner(gameObject);
-        if (owner == null)
-        {
-            Networking.SetOwner(player, gameObject);
-        }
-    }
-
-    private void sync()
-    {
-        var player = Networking.LocalPlayer;
-        if (player.IsOwner(gameObject))
-        {
-            RequestSerialization();
-            Notify();
-        }
-    }
-
+    // MasterClient から同期されたときに発火する
     public override void OnDeserialization()
     {
         Notify();
     }
+    // プレイヤーが入室したときに発火する
     public override void OnPlayerJoined(VRCPlayerApi player)
     {
-        RequestSerialization();
-    }
-
-    public void Increment()
-    {
-        transferOwner();
-        var player = Networking.LocalPlayer;
-
         if (player.IsOwner(gameObject))
         {
-            _count++;
-            sync();
+            RequestSerialization();
+        }
+    }
+
+    public void TransferOwner()
+    {
+        var player = Networking.LocalPlayer;
+        if (!player.IsOwner(gameObject))
+        {
+            Networking.SetOwner(player, gameObject);
+        }
+
+        Notify();
+    }
+
+        public void Increment()
+    {
+        var player = Networking.LocalPlayer;
+        if (player.IsOwner(gameObject))
+        {
+            RemoteIncrement();
         }
         else
         {
-            SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "Increment");
+            SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, nameof(RemoteIncrement));
         }
     }
+
 
     public void Decrement()
     {
-        transferOwner();
         var player = Networking.LocalPlayer;
-
         if (player.IsOwner(gameObject))
         {
-            _count--;
-            sync();
+            RemoteDecrement();
         }
         else
         {
-            SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "Decrement");
+            SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, nameof(RemoteDecrement));
         }
+    }
+
+    public void RemoteIncrement()
+    { 
+        _count++;
+        RequestSerialization();
+        Notify();
+    }
+
+    public void RemoteDecrement()
+    {
+        _count--;
+        RequestSerialization();
+        Notify();
     }
 }
